@@ -9,12 +9,14 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -33,11 +35,15 @@ export default function SignIn() {
 
       const data = await res.json();
       localStorage.setItem('token', data.access_token);
-      router.push('/'); 
+      setSuccess('Sign in successful! Redirecting to dashboard...');
+      
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1500);
     } catch (err) {
       setError(err.message || 'An error occurred. Please try again.');
     } finally {
-      setLoading(false);
+      if (!success) setLoading(false);
     }
   };
 
@@ -51,6 +57,7 @@ export default function SignIn() {
         </div>
 
         {error && <div className="auth-error">{error}</div>}
+        {success && <div className="auth-success">{success}</div>}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">

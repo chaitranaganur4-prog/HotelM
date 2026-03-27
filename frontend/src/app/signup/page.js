@@ -14,6 +14,7 @@ export default function SignUp() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const router = useRouter();
 
   const handleChange = (e) => {
@@ -28,6 +29,7 @@ export default function SignUp() {
     }
     setLoading(true);
     setError('');
+    setSuccess('');
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -49,11 +51,16 @@ export default function SignUp() {
         throw new Error(errorData.detail || 'An error occurred during sign up');
       }
 
-      router.push('/signin');
+      setSuccess('Account created successfully! Redirecting to sign in...');
+      
+      // Delay redirect to show success message
+      setTimeout(() => {
+        router.push('/signin');
+      }, 2000);
     } catch (err) {
       setError(err.message || 'An error occurred. Please try again.');
     } finally {
-      setLoading(false);
+      if (!success) setLoading(false);
     }
   };
 
@@ -67,6 +74,7 @@ export default function SignUp() {
         </div>
 
         {error && <div className="auth-error">{error}</div>}
+        {success && <div className="auth-success">{success}</div>}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-row">

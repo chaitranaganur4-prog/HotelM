@@ -6,42 +6,53 @@ export default function Home() {
       <nav className="navbar">
         <div className="logo">Hotel M</div>
         <div className="nav-links">
-          <Link href="/signin" className="btn btn-outline">Sign In</Link>
-          <Link href="/signup" className="btn btn-primary">Sign Up</Link>
+          <Link href="/explore" className="btn btn-outline">Explore Rooms</Link>
+          <Link href="/signin" className="btn btn-primary">Staff Login</Link>
         </div>
       </nav>
 
       <section className="hero">
         <div className="hero-content">
-          <h1>Experience Luxury and Comfort</h1>
-          <p>Book your stay at the most exquisite hotels and enjoy world-class amenities and services tailored just for you.</p>
+          <h1>
+            <span>Elevate Your</span>
+            <span>Hotel Operations</span>
+          </h1>
+          <p>The all-in-one management suite designed for the modern luxury hotelier. Streamline bookings, track assets, and deliver world-class service.</p>
           <div className="hero-actions">
-            <Link href="/rooms" className="btn btn-lg btn-primary">Book Now</Link>
-            <Link href="/explore" className="btn btn-lg btn-outline">Explore Rooms</Link>
+            <Link href="/signup" className="btn btn-lg btn-primary">Get Started</Link>
+            <Link href="/signin" className="btn btn-lg btn-outline">Go to Dashboard</Link>
           </div>
         </div>
         <div className="hero-image">
-          <img src="/hero.png" alt="Luxurious Hotel Lobby" className="hero-img-main" />
+          <div className="hero-glow"></div>
+          <img 
+            src="/hero-management.png" 
+            alt="Hotel Management Interface" 
+            className="hero-img-main" 
+          />
         </div>
       </section>
 
       <section className="features">
         <div className="feature">
-          <h3>Premium Suites</h3>
-          <p>Indulge in our spacious and elegantly designed suites with breathtaking views.</p>
+          <span className="feature-icon">📊</span>
+          <h3>Live Analytics</h3>
+          <p>Track occupancy rates, revenue, and guest trends in real-time with our intuitive dashboard.</p>
         </div>
         <div className="feature">
-          <h3>Gourmet Dining</h3>
-          <p>Savor exquisite dishes prepared by our world-renowned chefs using the finest ingredients.</p>
+          <span className="feature-icon">🗝️</span>
+          <h3>Room Management</h3>
+          <p>Easily manage room status, cleaning schedules, and maintenance requests in one place.</p>
         </div>
         <div className="feature">
-          <h3>Wellness & Spa</h3>
-          <p>Rejuvenate your mind, body, and soul at our state-of-the-art wellness center and spa.</p>
+          <span className="feature-icon">🤝</span>
+          <h3>Guest Portal</h3>
+          <p>Deliver a seamless booking experience for your guests with our white-label reservation system.</p>
         </div>
       </section>
 
       <footer className="footer">
-        <p>&copy; 2026 Hotel M. All rights reserved.</p>
+        <p>&copy; 2026 Hotel M Management System. All rights reserved.</p>
       </footer>
     </main>
   );
