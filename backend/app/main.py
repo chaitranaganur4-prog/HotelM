@@ -40,6 +40,30 @@ async def log_requests(request: Request, call_next):
         
     return response
 
+import traceback
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    error_msg = f"Unhandled exception: {exc}"
+    logger.error(error_msg)
+    logger.error(traceback.format_exc())
+    
+    # Return CORS headers even on 500 errors so the browser can read the response
+    origin = request.headers.get("origin", "*")
+    headers = {
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Methods": "*",
+        "Access-Control-Allow-Headers": "*"
+    }
+    
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error", "error": str(exc), "traceback": traceback.format_exc()},
+        headers=headers
+    )
+
 # CORS middleware
 origins = [origin.strip() for origin in settings.cors_origins.split(",")]
 app.add_middleware(
