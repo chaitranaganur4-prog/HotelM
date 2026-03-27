@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     secret_key: str = "change-me-in-production"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
-    cors_origins: str = "http://localhost:3000"
+    cors_origins: str = "http://localhost:3000,https://hotelm-frontend-final.vercel.app,https://hotel-m-frontend-v6.vercel.app"
 
     class Config:
         env_file = ".env"
