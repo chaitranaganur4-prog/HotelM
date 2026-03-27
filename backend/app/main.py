@@ -25,6 +25,19 @@ async def log_requests(request: Request, call_next):
     origin = request.headers.get("origin")
     logger.info(f"Incoming request: {request.method} {request.url} | Origin: {origin}")
     response = await call_next(request)
+    
+    # Manually ensure CORS headers for trusted origins if needed
+    trusted_origins = [
+        "https://hotelm-frontend-final.vercel.app",
+        "https://hotel-m-frontend-v6.vercel.app",
+        "http://localhost:3000"
+    ]
+    if origin in trusted_origins:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        
     return response
 
 # CORS middleware
