@@ -49,6 +49,11 @@ def get_guest(guest_id: int, db: Session = Depends(get_db)):
 
 @router.post("/", response_model=GuestResponse, status_code=201)
 def create_guest(guest: GuestCreate, db: Session = Depends(get_db), current_user = Depends(get_current_active_user)):
+    # Check if guest with this email already exists
+    existing_guest = db.query(models.Guest).filter(models.Guest.email == guest.email).first()
+    if existing_guest:
+        return existing_guest
+        
     db_guest = models.Guest(**guest.model_dump())
     db.add(db_guest)
     db.commit()
