@@ -6,6 +6,8 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.routes import guests, rooms, bookings, auth
+from app import database, models
+from sqlalchemy.orm import Session
 import logging
 
 # Configure logging
@@ -89,3 +91,45 @@ async def root():
 @app.get("/health", tags=["Health"])
 async def health_check():
     return {"status": "healthy"}
+
+@app.get("/api/stats")
+def get_stats(db: Session = Depends(database.get_db)):
+    from sqlalchemy import func
+    # 1. Room Stats
+    total_rooms = db.query(models.Room).count()
+    occupied_rooms = db.query(models.Room).filter(models.Room.status == 'occupied').count()
+    available_rooms = db.query(models.Room).filter(models.Room.status == 'available').count()
+    
+    # 2. Booking Stats
+    total_bookings = db.query(models.Booking).count()
+    
+    # 3. Revenue Stats
+    total_revenue = db.query(func.sum(models.Booking.total_amount)).filter(models.Booking.payment_status == 'paid').scalar() or 0
+    
+    # 4. Guest Stats
+    total_guests = db.query(models.Guest).count()
+    
+    # 5. Room Type analysis
+    room_types = db.query(models.RoomType.name, func.count(models.Room.id)).join(models.Room).group_by(models.RoomType.name).all()
+    
+    return {
+        "room_stats": {
+            "total": total_rooms,
+            "occupied": occupied_rooms,
+            "available": available_rooms,
+            "occupancy_rate": round((occupied_rooms / total_rooms * 100), 1) if total_rooms > 0 else 0
+        },
+        "booking_stats": {
+            "total": total_bookings
+        },
+        "revenue_stats": {
+            "total": float(total_revenue)
+        },
+        "guest_stats": {
+            "total": total_guests
+        },
+        "room_type_data": [
+            {"type": rt[0], "count": rt[1]} for rt in room_types
+        ]
+    }
+

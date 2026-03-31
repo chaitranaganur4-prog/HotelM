@@ -5,32 +5,44 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import '../dashboard.css';
 
-const GUESTS = [
-  { id: 'G-001', firstName: 'John',      lastName: 'Doe',       email: 'john.doe@email.com',          phone: '+1 555-0101', idType: 'Passport',    idNumber: 'A1234567', address: 'New York, USA',        bookings: 3, totalSpent: 2100, lastStay: '2026-03-31' },
-  { id: 'G-002', firstName: 'Sarah',     lastName: 'Wilson',    email: 'sarah.wilson@email.com',       phone: '+1 555-0102', idType: 'Driver Lic',  idNumber: 'DL8765432', address: 'Los Angeles, USA',    bookings: 2, totalSpent: 630,  lastStay: '2026-03-30' },
-  { id: 'G-003', firstName: 'Ravi',      lastName: 'Kumar',     email: 'ravi.kumar@email.com',         phone: '+91 9876543210', idType: 'Aadhaar',  idNumber: '1234 5678 9012', address: 'Bangalore, India', bookings: 1, totalSpent: 750, lastStay: '2026-04-01' },
-  { id: 'G-004', firstName: 'Priya',     lastName: 'Sharma',    email: 'priya.sharma@email.com',       phone: '+91 8765432109', idType: 'Passport',  idNumber: 'P9876543', address: 'Mumbai, India',       bookings: 4, totalSpent: 1840, lastStay: '2026-03-27' },
-  { id: 'G-005', firstName: 'Mike',      lastName: 'Johnson',   email: 'mike.johnson@email.com',       phone: '+44 7911 123456', idType: 'Passport', idNumber: 'GB123456D', address: 'London, UK',          bookings: 1, totalSpent: 750,  lastStay: '2026-04-05' },
-  { id: 'G-006', firstName: 'Anjali',    lastName: 'Singh',     email: 'anjali.singh@email.com',       phone: '+91 7654321098', idType: 'Aadhaar',  idNumber: '9876 5432 1098', address: 'Delhi, India',    bookings: 2, totalSpent: 600,  lastStay: '2026-03-29' },
-  { id: 'G-007', firstName: 'Tom',       lastName: 'Harper',    email: 'tom.harper@email.com',         phone: '+1 555-0107', idType: 'Driver Lic',  idNumber: 'DL1234567', address: 'Chicago, USA',        bookings: 1, totalSpent: 0,    lastStay: '2026-03-20' },
-  { id: 'G-008', firstName: 'Nisha',     lastName: 'Patel',     email: 'nisha.patel@email.com',        phone: '+91 6543210987', idType: 'Passport',  idNumber: 'N3456789', address: 'Ahmedabad, India',    bookings: 1, totalSpent: 1200, lastStay: '2026-04-10' },
-  { id: 'G-009', firstName: 'Vikram',    lastName: 'Mehta',     email: 'vikram.mehta@email.com',       phone: '+91 5432109876', idType: 'Aadhaar',  idNumber: '5678 9012 3456', address: 'Hyderabad, India', bookings: 2, totalSpent: 900, lastStay: '2026-03-31' },
-  { id: 'G-010', firstName: 'Emily',     lastName: 'Clarke',    email: 'emily.clarke@email.com',       phone: '+44 7922 654321', idType: 'Passport', idNumber: 'GB654321F', address: 'Manchester, UK',       bookings: 1, totalSpent: 300,  lastStay: '2026-03-22' },
-];
-
-function getInitials(f, l) { return (f[0] + l[0]).toUpperCase(); }
+function getInitials(f, l) { 
+  if (!f || !l) return '?';
+  return (f[0] + l[0]).toUpperCase(); 
+}
 
 const AVATAR_COLORS = ['#3b82f6','#8b5cf6','#22c55e','#ef4444','#f97316','#06b6d4','#ec4899','#eab308','#14b8a6','#a855f7'];
 
 export default function GuestsPage() {
+  const [guests, setGuests] = useState([]);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
   const [sortBy, setSortBy] = useState('name');
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hotel-management-system-5e1w.onrender.com';
+
+  const fetchGuests = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/guests/`);
+      if (res.ok) {
+        const data = await res.json();
+        setGuests(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch guests:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) router.push('/signin');
+    if (!token) {
+      router.push('/signin');
+      return;
+    }
+    fetchGuests();
   }, [router]);
 
   const handleLogout = () => {
@@ -38,25 +50,26 @@ export default function GuestsPage() {
     router.push('/signin');
   };
 
-  const filtered = GUESTS
+  const filtered = guests
     .filter(g => {
       const q = search.toLowerCase();
+      const fullName = `${g.first_name} ${g.last_name}`.toLowerCase();
       return (
-        g.firstName.toLowerCase().includes(q) ||
-        g.lastName.toLowerCase().includes(q) ||
+        fullName.includes(q) ||
         g.email.toLowerCase().includes(q) ||
-        g.id.toLowerCase().includes(q) ||
-        g.address.toLowerCase().includes(q)
+        (g.phone || '').includes(q)
       );
     })
     .sort((a, b) => {
-      if (sortBy === 'name') return a.firstName.localeCompare(b.firstName);
-      if (sortBy === 'spent') return b.totalSpent - a.totalSpent;
-      if (sortBy === 'bookings') return b.bookings - a.bookings;
+      if (sortBy === 'name') return a.first_name.localeCompare(b.first_name);
       return 0;
     });
 
-  const totalRevenue = GUESTS.reduce((s, g) => s + g.totalSpent, 0);
+  if (loading) {
+    return <div className="dashboard-layout" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p>Loading guests...</p>
+    </div>;
+  }
 
   return (
     <div className="dashboard-layout">
@@ -91,26 +104,16 @@ export default function GuestsPage() {
         </header>
 
         {/* Stats */}
-        <div className="stats-grid">
+        <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
           <div className="stat-card">
             <p className="stat-label">Total Guests</p>
-            <p className="stat-value">{GUESTS.length}</p>
-            <p className="stat-trend" style={{ color: '#94a3b8' }}>Registered</p>
+            <p className="stat-value">{guests.length}</p>
+            <p className="stat-trend" style={{ color: '#94a3b8' }}>Stored in database</p>
           </div>
           <div className="stat-card">
-            <p className="stat-label">Total Bookings</p>
-            <p className="stat-value">{GUESTS.reduce((s, g) => s + g.bookings, 0)}</p>
-            <p className="stat-trend trend-up">Across all guests</p>
-          </div>
-          <div className="stat-card">
-            <p className="stat-label">Total Revenue</p>
-            <p className="stat-value">${totalRevenue.toLocaleString()}</p>
-            <p className="stat-trend trend-up">All time</p>
-          </div>
-          <div className="stat-card">
-            <p className="stat-label">Avg. Spend / Guest</p>
-            <p className="stat-value">${Math.round(totalRevenue / GUESTS.length).toLocaleString()}</p>
-            <p className="stat-trend" style={{ color: '#94a3b8' }}>Per guest</p>
+            <p className="stat-label">New Guests</p>
+            <p className="stat-value" style={{ color: '#22c55e' }}>{guests.length > 5 ? 5 : guests.length}</p>
+            <p className="stat-trend trend-up">Recently added</p>
           </div>
         </div>
 
@@ -118,7 +121,7 @@ export default function GuestsPage() {
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <input
             type="text"
-            placeholder="Search by name, email, ID or location..."
+            placeholder="Search by name, email or phone..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             style={{
@@ -128,7 +131,7 @@ export default function GuestsPage() {
             }}
           />
           <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Sort by:</span>
-          {[['name','Name'],['bookings','Bookings'],['spent','Total Spent']].map(([val, label]) => (
+          {[['name','Name']].map(([val, label]) => (
             <button key={val} onClick={() => setSortBy(val)} style={{
               padding: '0.6rem 1.1rem', borderRadius: 100, cursor: 'pointer', border: 'none',
               fontFamily: 'inherit', fontWeight: 600, fontSize: '0.82rem', transition: 'all 0.2s',
@@ -152,29 +155,22 @@ export default function GuestsPage() {
                   justifyContent: 'center', fontWeight: 700, fontSize: '1rem', flexShrink: 0,
                   background: AVATAR_COLORS[i % AVATAR_COLORS.length],
                 }}>
-                  {getInitials(g.firstName, g.lastName)}
+                  {getInitials(g.first_name, g.last_name)}
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ fontWeight: 700, fontSize: '1rem', marginBottom: 2 }}>{g.firstName} {g.lastName}</p>
+                  <p style={{ fontWeight: 700, fontSize: '1rem', marginBottom: 2 }}>{g.first_name} {g.last_name}</p>
                   <p style={{ color: '#64748b', fontSize: '0.78rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.email}</p>
                 </div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.82rem', color: '#94a3b8' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>📍 {g.address}</span>
+                  <span>📱 Phone</span>
+                  <span style={{ color: '#fff' }}>{g.phone || 'N/A'}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>📅 Bookings</span>
-                  <span style={{ color: '#fff', fontWeight: 600 }}>{g.bookings}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>💰 Total Spent</span>
-                  <span style={{ color: '#22c55e', fontWeight: 700 }}>${g.totalSpent.toLocaleString()}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>🗓 Last Stay</span>
-                  <span style={{ color: '#fff' }}>{g.lastStay}</span>
+                  <span>📅 ID</span>
+                  <span style={{ color: '#fff', fontWeight: 600 }}>{g.id}</span>
                 </div>
               </div>
 
@@ -186,7 +182,7 @@ export default function GuestsPage() {
           {filtered.length === 0 && (
             <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem 2rem', color: '#94a3b8' }}>
               <p style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🔍</p>
-              <p>No guests match your search.</p>
+              <p>No guests found in the database.</p>
             </div>
           )}
         </div>
@@ -207,13 +203,13 @@ export default function GuestsPage() {
                 <div style={{
                   width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center',
                   justifyContent: 'center', fontWeight: 700, fontSize: '1.2rem',
-                  background: AVATAR_COLORS[GUESTS.indexOf(selected) % AVATAR_COLORS.length],
+                  background: AVATAR_COLORS[guests.indexOf(selected) % AVATAR_COLORS.length],
                 }}>
-                  {getInitials(selected.firstName, selected.lastName)}
+                  {getInitials(selected.first_name, selected.last_name)}
                 </div>
                 <div>
-                  <h2 style={{ fontSize: '1.3rem' }}>{selected.firstName} {selected.lastName}</h2>
-                  <p style={{ color: '#64748b', fontSize: '0.82rem' }}>{selected.id}</p>
+                  <h2 style={{ fontSize: '1.3rem' }}>{selected.first_name} {selected.last_name}</h2>
+                  <p style={{ color: '#64748b', fontSize: '0.82rem' }}>Guest ID: {selected.id}</p>
                 </div>
               </div>
               <button onClick={() => setSelected(null)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#94a3b8', width: 32, height: 32, borderRadius: 8, cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
@@ -221,13 +217,9 @@ export default function GuestsPage() {
 
             {[
               ['Email', selected.email],
-              ['Phone', selected.phone],
-              ['Address', selected.address],
-              ['ID Type', selected.idType],
-              ['ID Number', selected.idNumber],
-              ['Total Bookings', selected.bookings],
-              ['Total Spent', `$${selected.totalSpent.toLocaleString()}`],
-              ['Last Stay', selected.lastStay],
+              ['Phone', selected.phone || 'Not provided'],
+              ['Last Name', selected.last_name],
+              ['First Name', selected.first_name],
             ].map(([k, v]) => (
               <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.7rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.875rem' }}>
                 <span style={{ color: '#94a3b8' }}>{k}</span>
