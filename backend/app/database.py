@@ -24,7 +24,7 @@ engine = create_engine(
         "connect_timeout": 10,
     },
     pool_pre_ping=True,      # Test connections before use
-    pool_recycle=300,        # Recycle connections every 5 min
+    pool_recycle=180,        # Recycle connections every 3 min to beat Neon DB proxy drop
     pool_size=5,
     max_overflow=2,
 )
