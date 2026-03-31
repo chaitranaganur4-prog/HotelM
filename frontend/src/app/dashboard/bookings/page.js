@@ -5,19 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import '../dashboard.css';
 
-const BOOKINGS = [
-  { id: 'BK-001', guest: 'John Doe',       room: '402', type: 'Premium Suite',   checkIn: '2026-03-28', checkOut: '2026-03-31', nights: 3, amount: 1200, status: 'confirmed', payment: 'paid' },
-  { id: 'BK-002', guest: 'Sarah Wilson',    room: '105', type: 'Standard Double', checkIn: '2026-03-30', checkOut: '2026-04-02', nights: 3, amount: 330,  status: 'checked_in', payment: 'paid' },
-  { id: 'BK-003', guest: 'Ravi Kumar',      room: '202', type: 'Suite',           checkIn: '2026-04-01', checkOut: '2026-04-04', nights: 3, amount: 750,  status: 'confirmed', payment: 'pending' },
-  { id: 'BK-004', guest: 'Priya Sharma',    room: '103', type: 'Standard Single', checkIn: '2026-03-25', checkOut: '2026-03-27', nights: 2, amount: 160,  status: 'checked_out', payment: 'paid' },
-  { id: 'BK-005', guest: 'Mike Johnson',    room: '301', type: 'Suite',           checkIn: '2026-04-05', checkOut: '2026-04-08', nights: 3, amount: 750,  status: 'confirmed', payment: 'pending' },
-  { id: 'BK-006', guest: 'Anjali Singh',    room: '204', type: 'Deluxe Double',   checkIn: '2026-03-29', checkOut: '2026-03-31', nights: 2, amount: 300,  status: 'checked_in', payment: 'paid' },
-  { id: 'BK-007', guest: 'Tom Harper',      room: '303', type: 'Suite',           checkIn: '2026-03-20', checkOut: '2026-03-22', nights: 2, amount: 500,  status: 'cancelled', payment: 'refunded' },
-  { id: 'BK-008', guest: 'Nisha Patel',     room: '403', type: 'Premium Suite',   checkIn: '2026-04-10', checkOut: '2026-04-13', nights: 3, amount: 1200, status: 'confirmed', payment: 'pending' },
-  { id: 'BK-009', guest: 'Vikram Mehta',    room: '104', type: 'Deluxe Double',   checkIn: '2026-03-31', checkOut: '2026-04-03', nights: 3, amount: 450,  status: 'checked_in', payment: 'paid' },
-  { id: 'BK-010', guest: 'Emily Clarke',    room: '201', type: 'Deluxe Double',   checkIn: '2026-03-22', checkOut: '2026-03-24', nights: 2, amount: 300,  status: 'checked_out', payment: 'paid' },
-];
-
 const STATUS_STYLE = {
   confirmed:   { bg: 'rgba(59,130,246,0.12)',  color: '#3b82f6', label: 'Confirmed' },
   checked_in:  { bg: 'rgba(34,197,94,0.12)',   color: '#22c55e', label: 'Checked In' },
@@ -26,20 +13,42 @@ const STATUS_STYLE = {
 };
 
 const PAYMENT_STYLE = {
-  paid:     { bg: 'rgba(34,197,94,0.1)',   color: '#22c55e' },
   pending:  { bg: 'rgba(234,179,8,0.1)',   color: '#eab308' },
+  paid:     { bg: 'rgba(34,197,94,0.1)',   color: '#22c55e' },
   refunded: { bg: 'rgba(168,85,247,0.1)',  color: '#a855f7' },
 };
 
 export default function BookingsPage() {
+  const [bookings, setBookings] = useState([]);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hotel-management-system-5e1w.onrender.com';
+
+  const fetchBookings = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/bookings/`);
+      if (res.ok) {
+        const data = await res.json();
+        setBookings(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch bookings:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) router.push('/signin');
+    if (!token) {
+      router.push('/signin');
+      return;
+    }
+    fetchBookings();
   }, [router]);
 
   const handleLogout = () => {
@@ -47,22 +56,33 @@ export default function BookingsPage() {
     router.push('/signin');
   };
 
-  const filtered = BOOKINGS.filter(b => {
+  const filtered = bookings.filter(b => {
     const matchFilter = filter === 'all' || b.status === filter;
     const q = search.toLowerCase();
-    const matchSearch = b.guest.toLowerCase().includes(q) || b.id.toLowerCase().includes(q) || b.room.includes(q);
+    const guestName = `${b.guest?.first_name || ''} ${b.guest?.last_name || ''}`.toLowerCase();
+    const matchSearch = guestName.includes(q) || 
+                       b.id.toString().includes(q) || 
+                       (b.room?.room_number || '').includes(q);
     return matchFilter && matchSearch;
   });
 
   const counts = {
-    all: BOOKINGS.length,
-    confirmed: BOOKINGS.filter(b => b.status === 'confirmed').length,
-    checked_in: BOOKINGS.filter(b => b.status === 'checked_in').length,
-    checked_out: BOOKINGS.filter(b => b.status === 'checked_out').length,
-    cancelled: BOOKINGS.filter(b => b.status === 'cancelled').length,
+    all: bookings.length,
+    confirmed: bookings.filter(b => b.status === 'confirmed').length,
+    checked_in: bookings.filter(b => b.status === 'checked_in').length,
+    checked_out: bookings.filter(b => b.status === 'checked_out').length,
+    cancelled: bookings.filter(b => b.status === 'cancelled').length,
   };
 
-  const totalRevenue = BOOKINGS.filter(b => b.payment === 'paid').reduce((s, b) => s + b.amount, 0);
+  const totalRevenue = bookings
+    .filter(b => b.payment_status === 'paid')
+    .reduce((s, b) => s + parseFloat(b.total_amount || 0), 0);
+
+  if (loading) {
+    return <div className="dashboard-layout" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p>Loading bookings...</p>
+    </div>;
+  }
 
   return (
     <div className="dashboard-layout">
@@ -154,7 +174,7 @@ export default function BookingsPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                {['Booking ID', 'Guest', 'Room', 'Check-In', 'Check-Out', 'Nights', 'Amount', 'Payment', 'Status', ''].map(h => (
+                {['ID', 'Guest', 'Room', 'Check-In', 'Check-Out', 'Amount', 'Payment', 'Status', ''].map(h => (
                   <th key={h} style={{ padding: '1.1rem 1.25rem', textAlign: 'left', fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
                 ))}
               </tr>
@@ -166,24 +186,24 @@ export default function BookingsPage() {
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   onClick={() => setSelected(b)}
                 >
-                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.875rem', color: '#3b82f6', fontWeight: 600 }}>{b.id}</td>
-                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.875rem', fontWeight: 500 }}>{b.guest}</td>
-                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.875rem', color: '#94a3b8' }}>
-                    <span style={{ color: '#fff', fontWeight: 600 }}>#{b.room}</span>
-                    <br /><span style={{ fontSize: '0.75rem' }}>{b.type}</span>
+                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.875rem', color: '#3b82f6', fontWeight: 600 }}>BK-{b.id}</td>
+                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.875rem', fontWeight: 500 }}>
+                    {b.guest?.first_name} {b.guest?.last_name}
                   </td>
-                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.875rem', color: '#94a3b8' }}>{b.checkIn}</td>
-                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.875rem', color: '#94a3b8' }}>{b.checkOut}</td>
-                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.875rem', textAlign: 'center' }}>{b.nights}</td>
-                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.875rem', fontWeight: 700, color: '#fff' }}>${b.amount}</td>
+                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.875rem', color: '#94a3b8' }}>
+                    <span style={{ color: '#fff', fontWeight: 600 }}>#{b.room?.room_number}</span>
+                  </td>
+                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.875rem', color: '#94a3b8' }}>{b.check_in_date}</td>
+                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.875rem', color: '#94a3b8' }}>{b.check_out_date}</td>
+                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.875rem', fontWeight: 700, color: '#fff' }}>${parseFloat(b.total_amount).toLocaleString()}</td>
                   <td style={{ padding: '1rem 1.25rem' }}>
-                    <span style={{ padding: '0.2rem 0.65rem', borderRadius: 100, fontSize: '0.72rem', fontWeight: 600, background: PAYMENT_STYLE[b.payment].bg, color: PAYMENT_STYLE[b.payment].color }}>
-                      {b.payment.charAt(0).toUpperCase() + b.payment.slice(1)}
+                    <span style={{ padding: '0.2rem 0.65rem', borderRadius: 100, fontSize: '0.72rem', fontWeight: 600, background: PAYMENT_STYLE[b.payment_status]?.bg || 'rgba(255,255,255,0.1)', color: PAYMENT_STYLE[b.payment_status]?.color || '#fff' }}>
+                      {b.payment_status?.charAt(0).toUpperCase() + b.payment_status?.slice(1)}
                     </span>
                   </td>
                   <td style={{ padding: '1rem 1.25rem' }}>
-                    <span style={{ padding: '0.2rem 0.65rem', borderRadius: 100, fontSize: '0.72rem', fontWeight: 600, background: STATUS_STYLE[b.status].bg, color: STATUS_STYLE[b.status].color }}>
-                      {STATUS_STYLE[b.status].label}
+                    <span style={{ padding: '0.2rem 0.65rem', borderRadius: 100, fontSize: '0.72rem', fontWeight: 600, background: STATUS_STYLE[b.status]?.bg || 'rgba(59,130,246,0.15)', color: STATUS_STYLE[b.status]?.color || '#3b82f6' }}>
+                      {STATUS_STYLE[b.status]?.label || b.status}
                     </span>
                   </td>
                   <td style={{ padding: '1rem 1.25rem' }}>
@@ -195,8 +215,8 @@ export default function BookingsPage() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={10} style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>
-                    No bookings match your search.
+                  <td colSpan={9} style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>
+                    No bookings found in the database.
                   </td>
                 </tr>
               )}
@@ -220,13 +240,12 @@ export default function BookingsPage() {
               <button onClick={() => setSelected(null)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#94a3b8', width: 32, height: 32, borderRadius: 8, cursor: 'pointer', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
             </div>
             {[
-              ['Booking ID', selected.id],
-              ['Guest', selected.guest],
-              ['Room', `#${selected.room} — ${selected.type}`],
-              ['Check-In', selected.checkIn],
-              ['Check-Out', selected.checkOut],
-              ['Duration', `${selected.nights} nights`],
-              ['Total Amount', `$${selected.amount}`],
+              ['Booking ID', `BK-${selected.id}`],
+              ['Guest', `${selected.guest?.first_name} ${selected.guest?.last_name}`],
+              ['Room', `#${selected.room?.room_number}`],
+              ['Check-In', selected.check_in_date],
+              ['Check-Out', selected.check_out_date],
+              ['Total Amount', `$${parseFloat(selected.total_amount).toLocaleString()}`],
             ].map(([k, v]) => (
               <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.9rem' }}>
                 <span style={{ color: '#94a3b8' }}>{k}</span>
@@ -235,14 +254,14 @@ export default function BookingsPage() {
             ))}
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', alignItems: 'center' }}>
               <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Status</span>
-              <span style={{ padding: '0.25rem 0.75rem', borderRadius: 100, fontSize: '0.78rem', fontWeight: 600, background: STATUS_STYLE[selected.status].bg, color: STATUS_STYLE[selected.status].color }}>
-                {STATUS_STYLE[selected.status].label}
+              <span style={{ padding: '0.25rem 0.75rem', borderRadius: 100, fontSize: '0.78rem', fontWeight: 600, background: STATUS_STYLE[selected.status]?.bg || 'rgba(59,130,246,0.15)', color: STATUS_STYLE[selected.status]?.color || '#3b82f6' }}>
+                {STATUS_STYLE[selected.status]?.label || selected.status}
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', alignItems: 'center' }}>
               <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Payment</span>
-              <span style={{ padding: '0.25rem 0.75rem', borderRadius: 100, fontSize: '0.78rem', fontWeight: 600, background: PAYMENT_STYLE[selected.payment].bg, color: PAYMENT_STYLE[selected.payment].color }}>
-                {selected.payment.charAt(0).toUpperCase() + selected.payment.slice(1)}
+              <span style={{ padding: '0.25rem 0.75rem', borderRadius: 100, fontSize: '0.78rem', fontWeight: 600, background: PAYMENT_STYLE[selected.payment_status]?.bg || 'rgba(255,255,255,0.1)', color: PAYMENT_STYLE[selected.payment_status]?.color || '#fff' }}>
+                {selected.payment_status?.charAt(0).toUpperCase() + selected.payment_status?.slice(1)}
               </span>
             </div>
             <button onClick={() => setSelected(null)} className="btn btn-primary" style={{ width: '100%', marginTop: '1.5rem', padding: '0.875rem', borderRadius: 12 }}>
