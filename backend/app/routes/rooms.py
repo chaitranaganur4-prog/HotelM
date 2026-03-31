@@ -26,13 +26,22 @@ class RoomTypeResponse(BaseModel):
         from_attributes = True
 
 
+class RoomTypeInfo(BaseModel):
+    name: str
+    base_price: float
+    capacity: int
+
+    class Config:
+        from_attributes = True
+
+
 class RoomResponse(BaseModel):
     id: int
     room_number: str
     room_type_id: int
     floor: Optional[int] = None
     status: str
-    room_type: Optional[RoomTypeResponse] = None
+    room_type: Optional[RoomTypeInfo] = None
 
     class Config:
         from_attributes = True

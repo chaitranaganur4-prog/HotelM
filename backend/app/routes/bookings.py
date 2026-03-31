@@ -16,6 +16,24 @@ router = APIRouter()
 
 # --- Pydantic Schemas ---
 
+class GuestInfo(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+
+    class Config:
+        from_attributes = True
+
+
+class RoomInfo(BaseModel):
+    room_number: str
+    floor: Optional[int] = None
+    status: str
+
+    class Config:
+        from_attributes = True
+
+
 class BookingCreate(BaseModel):
     guest_id: int
     room_id: int
@@ -24,10 +42,17 @@ class BookingCreate(BaseModel):
     total_amount: Optional[float] = None
 
 
-class BookingResponse(BookingCreate):
+class BookingResponse(BaseModel):
     id: int
+    guest_id: int
+    room_id: int
+    check_in_date: date
+    check_out_date: date
+    total_amount: Optional[float] = None
     status: str
     payment_status: str
+    guest: Optional[GuestInfo] = None
+    room: Optional[RoomInfo] = None
 
     class Config:
         from_attributes = True
