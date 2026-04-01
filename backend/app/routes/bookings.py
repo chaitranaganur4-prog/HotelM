@@ -81,6 +81,9 @@ def get_booking(booking_id: int, db: Session = Depends(get_db)):
 
 @router.post("/", response_model=BookingResponse, status_code=201)
 def create_booking(booking: BookingCreate, db: Session = Depends(get_db), current_user = Depends(get_current_active_user)):
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"Booking request: {booking}")
     # Verify room is available
     room = db.query(models.Room).filter(models.Room.id == booking.room_id).first()
     if not room:
