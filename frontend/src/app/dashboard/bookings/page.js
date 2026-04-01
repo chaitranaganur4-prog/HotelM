@@ -23,20 +23,29 @@ export default function BookingsPage() {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hotel-management-system-5e1w.onrender.com';
 
-  const fetchBookings = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/bookings/`);
-      if (res.ok) {
-        const data = await res.json();
+      const [bookingsRes, statsRes] = await Promise.all([
+        fetch(`${API_URL}/api/bookings/`),
+        fetch(`${API_URL}/api/stats`)
+      ]);
+      
+      if (bookingsRes.ok) {
+        const data = await bookingsRes.json();
         setBookings(data);
       }
+      if (statsRes.ok) {
+        const data = await statsRes.json();
+        setStats(data);
+      }
     } catch (err) {
-      console.error("Failed to fetch bookings:", err);
+      console.error("Failed to fetch data:", err);
     } finally {
       setLoading(false);
     }
@@ -48,7 +57,7 @@ export default function BookingsPage() {
       router.push('/signin');
       return;
     }
-    fetchBookings();
+    fetchData();
   }, [router]);
 
   const handleLogout = () => {
@@ -57,7 +66,17 @@ export default function BookingsPage() {
   };
 
   const filtered = bookings.filter(b => {
-    const matchFilter = filter === 'all' || b.status === filter;
+    let matchFilter = filter === 'all';
+    
+    if (filter === 'paid') {
+      matchFilter = b.payment_status === 'paid';
+    } else if (filter === 'today') {
+      const today = new Date().toISOString().split('T')[0];
+      matchFilter = b.check_in_date === today;
+    } else if (filter !== 'all') {
+      matchFilter = b.status === filter;
+    }
+
     const q = search.toLowerCase();
     const guestName = `${b.guest?.first_name || ''} ${b.guest?.last_name || ''}`.toLowerCase();
     const matchSearch = guestName.includes(q) || 
@@ -72,6 +91,8 @@ export default function BookingsPage() {
     checked_in: bookings.filter(b => b.status === 'checked_in').length,
     checked_out: bookings.filter(b => b.status === 'checked_out').length,
     cancelled: bookings.filter(b => b.status === 'cancelled').length,
+    paid: bookings.filter(b => b.payment_status === 'paid').length,
+    today: bookings.filter(b => b.check_in_date === new Date().toISOString().split('T')[0]).length,
   };
 
   const totalRevenue = bookings
@@ -121,17 +142,17 @@ export default function BookingsPage() {
           <div className="stat-card">
             <p className="stat-label">Total Bookings</p>
             <p className="stat-value">{counts.all}</p>
-            <p className="stat-trend" style={{ color: '#94a3b8' }}>All time</p>
+            <p className="stat-trend" style={{ color: '#94a3b8' }}>Reservations</p>
           </div>
           <div className="stat-card">
-            <p className="stat-label">Confirmed</p>
-            <p className="stat-value" style={{ color: '#3b82f6' }}>{counts.confirmed}</p>
-            <p className="stat-trend trend-up">Upcoming stays</p>
+            <p className="stat-label">Total Rooms</p>
+            <p className="stat-value" style={{ color: '#8b5cf6' }}>{stats?.room_stats?.total || 12}</p>
+            <p className="stat-trend" style={{ color: '#94a3b8' }}>Inventory</p>
           </div>
           <div className="stat-card">
-            <p className="stat-label">Currently Checked In</p>
-            <p className="stat-value" style={{ color: '#22c55e' }}>{counts.checked_in}</p>
-            <p className="stat-trend trend-up">Active guests</p>
+            <p className="stat-label">Current Occupancy</p>
+            <p className="stat-value" style={{ color: '#22c55e' }}>{stats?.room_stats?.occupancy_rate || 0}%</p>
+            <p className="stat-trend trend-up">Active status</p>
           </div>
           <div className="stat-card">
             <p className="stat-label">Revenue Collected</p>
@@ -153,18 +174,16 @@ export default function BookingsPage() {
               borderRadius: 12, color: '#f8fafc', outline: 'none', fontFamily: 'inherit',
             }}
           />
-          {['all', 'confirmed', 'checked_in', 'checked_out', 'cancelled'].map(f => (
+          {['all', 'today', 'confirmed', 'checked_in', 'checked_out', 'cancelled', 'paid'].map(f => (
             <button key={f} onClick={() => setFilter(f)} style={{
               padding: '0.625rem 1.1rem', borderRadius: 100, cursor: 'pointer', fontWeight: 600,
               fontSize: '0.82rem', border: 'none', transition: 'all 0.2s', fontFamily: 'inherit',
               background: filter === f
-                ? (f === 'all' ? '#3b82f6' : STATUS_STYLE[f]?.bg || 'rgba(59,130,246,0.15)')
+                ? (f === 'all' ? '#3b82f6' : (f === 'paid' ? '#22c55e' : (f === 'today' ? '#f59e0b' : STATUS_STYLE[f]?.bg || 'rgba(59,130,246,0.15)')))
                 : 'rgba(255,255,255,0.05)',
-              color: filter === f
-                ? (f === 'all' ? '#fff' : STATUS_STYLE[f]?.color || '#3b82f6')
-                : '#94a3b8',
+              color: filter === f ? '#fff' : '#94a3b8',
             }}>
-              {f === 'all' ? 'All' : STATUS_STYLE[f]?.label} ({f === 'all' ? counts.all : counts[f] ?? 0})
+              {f === 'all' ? 'All' : (f === 'paid' ? 'Paid' : (f === 'today' ? 'Today' : STATUS_STYLE[f]?.label))} ({f === 'all' ? counts.all : counts[f] ?? 0})
             </button>
           ))}
         </div>

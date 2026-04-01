@@ -3,7 +3,7 @@ Hotel M — Booking Routes
 """
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.database import get_db
 from app import models
 from app.dependencies import get_current_active_user
@@ -62,7 +62,10 @@ class BookingResponse(BaseModel):
 
 @router.get("/", response_model=list[BookingResponse])
 def get_bookings(status: Optional[str] = None, db: Session = Depends(get_db)):
-    query = db.query(models.Booking)
+    query = db.query(models.Booking).options(
+        joinedload(models.Booking.room),
+        joinedload(models.Booking.guest)
+    )
     if status:
         query = query.filter(models.Booking.status == status)
     return query.all()

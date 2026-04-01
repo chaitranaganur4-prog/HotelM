@@ -14,8 +14,12 @@
   --glass-border: rgba(255, 255, 255, 0.08);
 }
 
-* {
+html {
   box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
   margin: 0;
   padding: 0;
 }
@@ -124,8 +128,15 @@ body {
 }
 
 @keyframes slideLeft {
-  from { opacity: 0; transform: translateX(-30px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .hero-content h1 {
@@ -162,8 +173,15 @@ body {
 }
 
 @keyframes slideRight {
-  from { opacity: 0; transform: translateX(30px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .hero-img-main {
@@ -261,12 +279,15 @@ body {
     text-align: center;
     gap: 2rem;
   }
+
   .hero-content h1 {
     font-size: 2.5rem;
   }
+
   .hero-actions {
     justify-content: center;
   }
+
   .features {
     grid-template-columns: 1fr;
   }
@@ -299,6 +320,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -340,14 +362,21 @@ body {
 
 .form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .form-group label {
@@ -365,6 +394,7 @@ body {
   font-family: var(--font-main);
   font-size: 1rem;
   transition: var(--transition);
+  width: 100%;
 }
 
 .form-group input:focus {

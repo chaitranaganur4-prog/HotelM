@@ -7,8 +7,8 @@ import '../dashboard.css';
 
 const STATUS_COLORS = {
   available: { bg: 'rgba(34,197,94,0.12)', color: '#22c55e', label: 'Available' },
-  occupied:  { bg: 'rgba(239,68,68,0.12)',  color: '#ef4444', label: 'Occupied' },
-  cleaning:  { bg: 'rgba(234,179,8,0.12)',  color: '#eab308', label: 'Cleaning' },
+  occupied: { bg: 'rgba(239,68,68,0.12)', color: '#ef4444', label: 'Occupied' },
+  cleaning: { bg: 'rgba(234,179,8,0.12)', color: '#eab308', label: 'Cleaning' },
   maintenance: { bg: 'rgba(168,85,247,0.12)', color: '#a855f7', label: 'Maintenance' },
 };
 
@@ -24,14 +24,14 @@ export default function RoomsPage() {
   const [filter, setFilter] = useState('all');
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [bookingData, setBookingData] = useState({ 
-    guestFirstName: '', 
-    guestLastName: '', 
-    email: '', 
+  const [bookingData, setBookingData] = useState({
+    guestFirstName: '',
+    guestLastName: '',
+    email: '',
     phone: '',
-    checkIn: '', 
-    checkOut: '', 
-    notes: '' 
+    checkIn: '',
+    checkOut: '',
+    notes: ''
   });
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,8 +71,8 @@ export default function RoomsPage() {
 
   const filtered = rooms.filter(r => {
     const matchesFilter = filter === 'all' || r.status === filter;
-    const matchesSearch = r.room_number.includes(search) || 
-                         (r.room_type?.name || '').toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = r.room_number.includes(search) ||
+      (r.room_type?.name || '').toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -86,14 +86,14 @@ export default function RoomsPage() {
 
   const handleBookClick = (room) => {
     setSelectedRoom(room);
-    setBookingData({ 
-      guestFirstName: '', 
-      guestLastName: '', 
-      email: '', 
+    setBookingData({
+      guestFirstName: '',
+      guestLastName: '',
+      email: '',
       phone: '',
-      checkIn: '', 
-      checkOut: '', 
-      notes: '' 
+      checkIn: '',
+      checkOut: '',
+      notes: ''
     });
     setBookingSuccess(false);
     setShowModal(true);
@@ -108,7 +108,7 @@ export default function RoomsPage() {
       // 1. Create or Get Guest
       const guestRes = await fetch(`${API_URL}/api/guests/`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -129,7 +129,7 @@ export default function RoomsPage() {
       // 2. Create Booking
       const bookingRes = await fetch(`${API_URL}/api/bookings/`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -284,14 +284,8 @@ export default function RoomsPage() {
 
       {/* Booking Modal */}
       {showModal && selectedRoom && (
-        <div onClick={() => !isSubmitting && setShowModal(false)} style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex',
-          alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem',
-        }}>
-          <div onClick={e => e.stopPropagation()} style={{
-            background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 24,
-            padding: '2.5rem', width: '100%', maxWidth: 480, boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
-          }}>
+        <div className="modal-overlay" onClick={() => !isSubmitting && setShowModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
             {bookingSuccess ? (
               <div style={{ textAlign: 'center', padding: '2rem 0' }}>
                 <p style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</p>
@@ -305,18 +299,16 @@ export default function RoomsPage() {
                   <p style={{ color: '#94a3b8' }}>{selectedRoom.room_type?.name} · ${selectedRoom.room_type?.base_price}/night</p>
                 </div>
                 <form onSubmit={handleBookingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                  <div style={{ display: 'flex', gap: '1rem' }}>
-                    <div className="form-group" style={{ flex: 1 }}>
+                    <div className="form-group">
                       <label>First Name</label>
                       <input type="text" placeholder="John" required value={bookingData.guestFirstName}
                         onChange={e => setBookingData({ ...bookingData, guestFirstName: e.target.value })} />
                     </div>
-                    <div className="form-group" style={{ flex: 1 }}>
+                    <div className="form-group">
                       <label>Last Name</label>
                       <input type="text" placeholder="Doe" required value={bookingData.guestLastName}
                         onChange={e => setBookingData({ ...bookingData, guestLastName: e.target.value })} />
                     </div>
-                  </div>
                   <div className="form-group">
                     <label>Email Address</label>
                     <input type="email" placeholder="john@email.com" required value={bookingData.email}
@@ -327,18 +319,16 @@ export default function RoomsPage() {
                     <input type="tel" placeholder="+1 555-0000" value={bookingData.phone}
                       onChange={e => setBookingData({ ...bookingData, phone: e.target.value })} />
                   </div>
-                  <div style={{ display: 'flex', gap: '1rem' }}>
-                    <div className="form-group" style={{ flex: 1 }}>
+                    <div className="form-group">
                       <label>Check-In Date</label>
                       <input type="date" required value={bookingData.checkIn}
                         onChange={e => setBookingData({ ...bookingData, checkIn: e.target.value })} />
                     </div>
-                    <div className="form-group" style={{ flex: 1 }}>
+                    <div className="form-group">
                       <label>Check-Out Date</label>
                       <input type="date" required value={bookingData.checkOut}
                         onChange={e => setBookingData({ ...bookingData, checkOut: e.target.value })} />
                     </div>
-                  </div>
                   <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
                     <button type="button" onClick={() => setShowModal(false)} disabled={isSubmitting}
                       style={{ flex: 1, padding: '0.875rem', borderRadius: 12, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', cursor: 'pointer' }}>

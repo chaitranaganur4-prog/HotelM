@@ -6,21 +6,27 @@ import { useRouter } from 'next/navigation';
 import './dashboard.css';
 
 export default function Dashboard() {
+  const [bookings, setBookings] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hotel-management-system-5e1w.onrender.com';
 
-  const fetchStats = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/stats`);
-      if (res.ok) {
-        const data = await res.json();
-        setStats(data);
+      const [statsRes, bookingsRes] = await Promise.all([
+        fetch(`${API_URL}/api/stats`),
+        fetch(`${API_URL}/api/bookings/`)
+      ]);
+      
+      if (statsRes.ok) setStats(await statsRes.json());
+      if (bookingsRes.ok) {
+        const data = await bookingsRes.json();
+        setBookings(data.slice(0, 5)); // Only latest 5
       }
     } catch (err) {
-      console.error("Failed to fetch stats:", err);
+      console.error("Failed to fetch dashboard data:", err);
     } finally {
       setLoading(false);
     }
@@ -32,7 +38,7 @@ export default function Dashboard() {
       router.push('/signin');
       return;
     }
-    fetchStats();
+    fetchData();
   }, [router]);
 
   const handleLogout = () => {
@@ -126,6 +132,45 @@ export default function Dashboard() {
                 <span style={{ color: '#94a3b8' }}>{new Date().toLocaleTimeString()}</span>
               </div>
             </div>
+          </div>
+        </div>
+        
+        {/* Recent Activity */}
+        <div className="card" style={{ marginTop: '2rem', padding: '1.5rem' }}>
+          <div className="card-header" style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ fontSize: '1.25rem' }}>Recent Bookings</h3>
+            <Link href="/dashboard/bookings" style={{ fontSize: '0.85rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>View All →</Link>
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>ID</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>Guest</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>Room</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>Check-In</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bookings.map(b => (
+                  <tr key={b.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <td style={{ padding: '1rem', fontSize: '0.875rem' }}>BK-{b.id}</td>
+                    <td style={{ padding: '1rem', fontSize: '0.875rem' }}>{b.guest?.first_name} {b.guest?.last_name}</td>
+                    <td style={{ padding: '1rem', fontSize: '0.875rem' }}>#{b.room?.room_number}</td>
+                    <td style={{ padding: '1rem', fontSize: '0.875rem', color: '#94a3b8' }}>{b.check_in_date}</td>
+                    <td style={{ padding: '1rem' }}>
+                      <span style={{ padding: '0.2rem 0.6rem', borderRadius: 100, fontSize: '0.7rem', fontWeight: 600, background: 'rgba(59,130,246,0.1)', color: '#3b82f6' }}>{b.status}</span>
+                    </td>
+                  </tr>
+                ))}
+                {bookings.length === 0 && (
+                  <tr>
+                    <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No recent activity to show.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </main>
