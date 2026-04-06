@@ -39,7 +39,7 @@ export default function RoomsPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hotel-management-system-5e1w.onrender.com';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hotelm-backend-erid.onrender.com';
 
   const fetchRooms = async () => {
     try {

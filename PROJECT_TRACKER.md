@@ -30,7 +30,7 @@
 | 12| Pushed updates to GitHub repository `hotel-m` | ✅ | 2026-03-24 |
 | 13| Deployed Frontend to Vercel and linked to GitHub | ✅ | 2026-03-24 |
 | 14| Database Interlinking (Neon + Backend) | ✅ | 2026-03-24 |
-| 15| Backend Deployment to Render | ⏳ | 2026-03-24 |
+| 15| Backend Deployment to Render (hotelm-backend-erid.onrender.com) | ✅ | 2026-04-06 |
 | 16| Implemented JWT Authentication & Secured Routes | ✅ | 2026-03-25 |
 | 17| Refined & Secured CRUD (Guests, Rooms, Bookings) | ✅ | 2026-03-25 |
 
