@@ -2,9 +2,9 @@ import urllib.request
 import json
 import sys
 
-RENDER_TOKEN = "rnd_liBY8DSCWc2VYaqk0CwPBvWLPBO7"
-GITHUB_REPO = "https://github.com/vijaylaxmikiratageri-arch/HotelM"
-NEON_DB_URL = "postgresql://hotelm_admin:HotelMPassword2026@ep-fragrant-recipe-anxkxifu.c-6.us-east-1.aws.neon.tech/HotelM?sslmode=require"
+RENDER_TOKEN = "rnd_PzmSXA96d0fb8n63L2lO3owRNyIB"
+GITHUB_REPO = "https://github.com/chaitranaganur4-prog/HotelM"
+NEON_DB_URL = "postgresql://neondb_owner:npg_NEdwTSRF53zt@ep-twilight-rain-an9eno1t-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 
 def get_owner_id():
     url = "https://api.render.com/v1/owners"
