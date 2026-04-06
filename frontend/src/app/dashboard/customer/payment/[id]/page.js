@@ -84,7 +84,18 @@ export default function CustomerPayment() {
 
   return (
     <div className="dashboard-layout">
-      <main className="main-content" style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <Link href="/" className="sidebar-logo">Hotel M</Link>
+        <nav className="nav-menu">
+          <Link href="/dashboard/customer" className="nav-item"><span>🏠 Overview</span></Link>
+          <Link href="/dashboard/customer/bookings" className="nav-item"><span>📅 My Bookings</span></Link>
+          <Link href="/dashboard/customer/book" className="nav-item"><span>🗝️ Book a Room</span></Link>
+          <Link href="/profile" className="nav-item"><span>👤 Profile</span></Link>
+        </nav>
+      </aside>
+
+      <main className="main-content" style={{ maxWidth: '900px', margin: '0 auto', width: '100%' }}>
         <Link href="/dashboard/customer/bookings" style={{ color: '#3b82f6', marginBottom: '2rem', display: 'inline-block' }}>← Back to Dashboard</Link>
         
         <header className="dash-header">
