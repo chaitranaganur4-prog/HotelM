@@ -5,7 +5,7 @@ Hotel M — FastAPI Application Entry Point
 from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
-from app.routes import guests, rooms, bookings, auth
+from app.routes import guests, rooms, bookings, auth, customer
 from app import database, models
 from sqlalchemy.orm import Session
 import logging
@@ -81,6 +81,7 @@ app.include_router(guests.router, prefix="/api/guests", tags=["Guests"])
 app.include_router(rooms.router, prefix="/api/rooms", tags=["Rooms"])
 app.include_router(bookings.router, prefix="/api/bookings", tags=["Bookings"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
+app.include_router(customer.router, prefix="/api/customer", tags=["Customer"])
 
 
 @app.get("/", tags=["Root"])

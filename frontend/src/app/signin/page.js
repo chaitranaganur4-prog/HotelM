@@ -35,10 +35,15 @@ export default function SignIn() {
 
       const data = await res.json();
       localStorage.setItem('token', data.access_token);
+      localStorage.setItem('userRole', data.role);
       setSuccess('Sign in successful! Redirecting to dashboard...');
       
       setTimeout(() => {
-        router.push('/dashboard');
+        if (data.role === 'customer') {
+          router.push('/dashboard/customer');
+        } else {
+          router.push('/dashboard');
+        }
       }, 1500);
     } catch (err) {
       setError(err.message || 'An error occurred. Please try again.');

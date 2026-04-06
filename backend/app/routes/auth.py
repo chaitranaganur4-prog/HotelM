@@ -23,6 +23,7 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    role: str
 
 class UserResponse(BaseModel):
     id: int
@@ -68,4 +69,4 @@ async def signin(user: UserLogin, db: Session = Depends(get_db)):
         )
     
     access_token = create_access_token(data={"sub": db_user.email, "role": db_user.role})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer", "role": db_user.role}

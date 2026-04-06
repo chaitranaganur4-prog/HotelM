@@ -7,6 +7,7 @@ export default function Home() {
         <div className="logo">Hotel M</div>
         <div className="nav-links">
           <Link href="/explore" className="btn btn-outline">Explore Rooms</Link>
+          <Link href="/signin" className="btn btn-outline" style={{ border: 'none' }}>Customer Login</Link>
           <Link href="/signin" className="btn btn-primary">Staff Login</Link>
         </div>
       </nav>
@@ -19,8 +20,9 @@ export default function Home() {
           </h1>
           <p>The all-in-one management suite designed for the modern luxury hotelier. Streamline bookings, track assets, and deliver world-class service.</p>
           <div className="hero-actions">
-            <Link href="/signup" className="btn btn-lg btn-primary">Get Started</Link>
-            <Link href="/signin" className="btn btn-lg btn-outline">Go to Dashboard</Link>
+            <Link href="/signup" className="btn btn-lg btn-primary">Book Now</Link>
+            <Link href="/signin" className="btn btn-lg btn-outline">Customer Login</Link>
+            <Link href="/signin" className="btn btn-lg btn-outline" style={{ border: 'none' }}>Management Login</Link>
           </div>
         </div>
         <div className="hero-image">
