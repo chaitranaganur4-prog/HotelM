@@ -69,10 +69,11 @@ export default function CustomerBookRoom() {
         throw new Error(errData.detail || 'Failed to create booking');
       }
 
-      setSuccess('Booking successful! Redirecting to your reservations...');
+      setSuccess('Redirecting to secure payment...');
+      const data = await res.json();
       setTimeout(() => {
-        router.push('/dashboard/customer/bookings');
-      }, 2000);
+        router.push(`/dashboard/customer/payment/${data.id}`);
+      }, 1500);
     } catch (err) {
       setError(err.message);
       setBookingLoading(false);

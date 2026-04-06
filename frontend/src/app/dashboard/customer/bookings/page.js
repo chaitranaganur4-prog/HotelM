@@ -85,6 +85,15 @@ export default function CustomerBookings() {
                   <div className={`status-badge status-${booking.status.toLowerCase()}`}>
                     {booking.status}
                   </div>
+                  {booking.payment_status === 'pending' && booking.status !== 'cancelled' && (
+                    <Link 
+                      href={`/dashboard/customer/payment/${booking.id}`} 
+                      className="btn btn-primary"
+                      style={{ marginLeft: '1rem', padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}
+                    >
+                      Pay Now
+                    </Link>
+                  )}
                 </div>
               ))}
             </div>

@@ -130,3 +130,13 @@ def checkout_booking(booking_id: int, db: Session = Depends(get_db), current_use
 
     db.commit()
     return {"message": "Checkout completed successfully"}
+@router.patch("/{booking_id}/pay")
+def confirm_payment(booking_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_active_user)):
+    booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    booking.payment_status = "paid"
+    booking.status = "confirmed"
+    db.commit()
+    return {"message": "Payment confirmed successfully", "status": "confirmed"}
