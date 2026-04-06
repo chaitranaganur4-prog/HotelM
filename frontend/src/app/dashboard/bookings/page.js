@@ -283,9 +283,20 @@ export default function BookingsPage() {
                 {selected.payment_status?.charAt(0).toUpperCase() + selected.payment_status?.slice(1)}
               </span>
             </div>
-            <button onClick={() => setSelected(null)} className="btn btn-primary" style={{ width: '100%', marginTop: '1.5rem', padding: '0.875rem', borderRadius: 12 }}>
-              Close
-            </button>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+              {selected.payment_status === 'pending' && selected.status !== 'cancelled' && (
+                <Link href={`/dashboard/customer/payment/${selected.id}`} className="btn btn-primary" style={{ flex: 1, padding: '0.875rem', borderRadius: 12, textAlign: 'center', textDecoration: 'none' }}>
+                  Pay Now
+                </Link>
+              )}
+              <button 
+                onClick={() => setSelected(null)} 
+                className={selected.payment_status === 'pending' && selected.status !== 'cancelled' ? "btn" : "btn btn-primary"} 
+                style={{ flex: 1, padding: '0.875rem', borderRadius: 12, background: selected.payment_status === 'pending' && selected.status !== 'cancelled' ? 'rgba(255,255,255,0.05)' : '', color: '#fff', border: selected.payment_status === 'pending' && selected.status !== 'cancelled' ? '1px solid rgba(255,255,255,0.1)' : 'none', cursor: 'pointer' }}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
