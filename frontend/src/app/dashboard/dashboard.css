@@ -1,9 +1,15 @@
 :root {
-  --color-dash-bg: #0f172a;
-  --color-sidebar: #1e293b;
+  --color-dash-bg: #020617;
+  --color-sidebar: rgba(15, 23, 42, 0.9);
   --color-accent: #3b82f6;
-  --glass: rgba(15, 23, 42, 0.7);
-  --border: rgba(255, 255, 255, 0.08);
+  --color-accent-secondary: #8b5cf6;
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-glow: rgba(59, 130, 246, 0.1);
+  --border: rgba(255, 255, 255, 0.06);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --premium-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
 }
 
 .dashboard-layout {
@@ -11,19 +17,23 @@
   grid-template-columns: 280px 1fr;
   min-height: 100vh;
   background-color: var(--color-dash-bg);
-  color: #f8fafc;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.05) 0px, transparent 50%);
+  color: var(--text-main);
 }
 
 /* Sidebar */
 .sidebar {
   background-color: var(--color-sidebar);
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--glass-border);
   padding: 2.5rem 1.5rem;
   display: flex;
   flex-direction: column;
   position: sticky;
   top: 0;
   height: 100vh;
+  backdrop-filter: blur(20px);
 }
 
 .sidebar-logo {
@@ -118,11 +128,20 @@
 }
 
 .stat-card {
-  background-color: var(--glass);
-  border: 1px solid var(--border);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
   padding: 1.75rem;
   border-radius: 20px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: var(--premium-shadow);
 }
 
 .stat-label {
@@ -155,11 +174,18 @@
 }
 
 .card {
-  background-color: var(--glass);
-  border: 1px solid var(--border);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
   border-radius: 24px;
-  padding: 2rem;
-  backdrop-filter: blur(10px);
+  padding: 2.5rem;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: var(--premium-shadow);
 }
 
 .card-header {

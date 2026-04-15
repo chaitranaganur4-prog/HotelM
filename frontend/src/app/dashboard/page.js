@@ -61,6 +61,8 @@ export default function Dashboard() {
           <Link href="/dashboard/bookings" className="nav-item"><span>📅 Bookings</span></Link>
           <Link href="/dashboard/guests" className="nav-item"><span>👥 Guests</span></Link>
           <Link href="/dashboard/analytics" className="nav-item"><span>📊 Analytics</span></Link>
+          <div style={{ borderTop: '1px solid var(--border)', margin: '1rem 0' }}></div>
+          <Link href="/dashboard/customer" className="nav-item" style={{ color: 'var(--color-accent)' }}><span>✨ Guest Portal</span></Link>
         </nav>
         <div className="sidebar-footer">
           <button onClick={handleLogout} className="nav-item" style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer' }}>
@@ -76,10 +78,10 @@ export default function Dashboard() {
             <h1>Staff Dashboard</h1>
             <p style={{ color: '#94a3b8' }}>Welcome back, Admin</p>
           </div>
-          <div className="user-profile">
+          <Link href="/dashboard/admin" className="user-profile" style={{ textDecoration: 'none', cursor: 'pointer' }}>
             <div className="avatar">AD</div>
             <span>Admin</span>
-          </div>
+          </Link>
         </header>
 
         {/* Quick Stats */}

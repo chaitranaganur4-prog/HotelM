@@ -87,57 +87,81 @@ export default function CustomerBookRoom() {
   return (
     <div className="dashboard-layout">
       <aside className="sidebar">
-        <Link href="/" className="sidebar-logo">Hotel M</Link>
+        <Link href="/" className="sidebar-logo">
+          <span style={{ color: '#fff' }}>Hotel</span><span style={{ color: 'var(--color-accent)' }}>M</span>
+        </Link>
         <nav className="nav-menu">
-          <Link href="/dashboard/customer" className="nav-item"><span>🏠 Overview</span></Link>
-          <Link href="/dashboard/customer/bookings" className="nav-item"><span>📅 My Bookings</span></Link>
-          <Link href="/dashboard/customer/book" className="nav-item active"><span>🗝️ Book a Room</span></Link>
-          <Link href="/profile" className="nav-item"><span>👤 Profile</span></Link>
+          <Link href="/dashboard/customer" className="nav-item">
+            <span className="nav-icon">🏠</span>
+            <span>Overview</span>
+          </Link>
+          <Link href="/dashboard/customer/bookings" className="nav-item">
+            <span className="nav-icon">📅</span>
+            <span>My Bookings</span>
+          </Link>
+          <Link href="/dashboard/customer/book" className="nav-item active">
+            <span className="nav-icon">🗝️</span>
+            <span>Book a Room</span>
+          </Link>
+          <Link href="/explore" className="nav-item">
+            <span className="nav-icon">✨</span>
+            <span>Explore Luxury</span>
+          </Link>
         </nav>
       </aside>
 
       <main className="main-content">
         <header className="dash-header">
-          <h1>Find Your Perfect Stay</h1>
-          <p style={{ color: '#94a3b8' }}>Explore our curated collection of luxury suites</p>
+          <div>
+            <h1 className="premium-text">Find Your Perfect Stay</h1>
+            <p className="text-muted">Explore our curated collection of luxury suites and exclusive escapes</p>
+          </div>
         </header>
 
         {error && <div className="auth-error">{error}</div>}
         {success && <div className="auth-success">{success}</div>}
 
-        <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+        <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
           {rooms.map(room => (
-            <div key={room.id} className="card" style={{ padding: '1.5rem' }}>
+            <div key={room.id} className="card premium-card-hover" style={{ padding: '0', overflow: 'hidden' }}>
               <div style={{ 
-                height: '180px', 
-                backgroundColor: '#1e293b', 
-                borderRadius: '12px', 
-                marginBottom: '1rem',
+                height: '200px', 
+                background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9))', 
+                position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '3rem'
+                fontSize: '4rem'
               }}>
+                <div style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', padding: '0.25rem 0.75rem', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 700 }}>AVAILABLE</div>
                 🏨
               </div>
-              <h3>Room {room.room_number}</h3>
-              <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
-                {room.room_type?.name || 'Exclusive Suite'} - {room.floor}th Floor
-              </p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '1.25rem', fontWeight: 700 }}>$125<span style={{ fontSize: '0.85rem', fontWeight: 400, color: '#94a3b8' }}>/night</span></span>
+              <div style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                   <h3 style={{ fontSize: '1.25rem' }}>Room {room.room_number}</h3>
+                   <span style={{ color: 'var(--color-accent)', fontWeight: 700 }}>$125<small style={{ fontWeight: 400, color: 'var(--text-muted)' }}>/nt</small></span>
+                </div>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+                  {room.room_type?.name || 'Exclusive Suite'} • Floor {room.floor} • Premium View
+                </p>
                 <button 
                   onClick={() => handleBook(room.id)} 
-                  className="btn btn-primary"
+                  className="btn btn-primary premium-btn"
+                  style={{ width: '100%' }}
                   disabled={bookingLoading}
                 >
-                  {bookingLoading ? 'Processing...' : 'Book Now'}
+                  {bookingLoading ? 'Securing Stay...' : 'Reserve This Room'}
                 </button>
               </div>
             </div>
           ))}
         </div>
       </main>
+      <style jsx>{`
+        .nav-icon { margin-right: 0.75rem; font-size: 1.2rem; }
+        .premium-card-hover { transition: all 0.3s ease; border: 1px solid var(--glass-border); }
+        .premium-card-hover:hover { transform: translateY(-5px); border-color: var(--color-accent); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+      `}</style>
     </div>
   );
 }

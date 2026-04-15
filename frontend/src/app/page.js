@@ -1,14 +1,37 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function Home() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('userRole');
+    if (token) {
+      setIsLoggedIn(true);
+      setRole(userRole);
+    }
+  }, []);
+
+  const dashboardPath = role === 'customer' ? '/dashboard/customer' : '/dashboard';
+
   return (
     <main className="container">
       <nav className="navbar">
         <div className="logo">Hotel M</div>
         <div className="nav-links">
           <Link href="/explore" className="btn btn-outline">Explore Rooms</Link>
-          <Link href="/signin" className="btn btn-outline" style={{ border: 'none' }}>Customer Login</Link>
-          <Link href="/signin" className="btn btn-primary">Staff Login</Link>
+          {isLoggedIn ? (
+            <Link href={dashboardPath} className="btn btn-primary">Dashboard</Link>
+          ) : (
+            <>
+              <Link href="/login" className="btn btn-outline" style={{ border: 'none', color: 'var(--color-accent)' }}>Guest Login</Link>
+              <Link href="/signin" className="btn btn-primary" style={{ background: 'var(--color-secondary)' }}>Staff Access</Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -20,9 +43,14 @@ export default function Home() {
           </h1>
           <p>The all-in-one management suite designed for the modern luxury hotelier. Streamline bookings, track assets, and deliver world-class service.</p>
           <div className="hero-actions">
-            <Link href="/signup" className="btn btn-lg btn-primary">Book Now</Link>
-            <Link href="/signin" className="btn btn-lg btn-outline">Customer Login</Link>
-            <Link href="/signin" className="btn btn-lg btn-outline" style={{ border: 'none' }}>Management Login</Link>
+            {isLoggedIn ? (
+              <Link href={dashboardPath} className="btn btn-lg btn-primary">Go to Dashboard</Link>
+            ) : (
+              <>
+                <Link href="/signup" className="btn btn-lg btn-primary">Book Now</Link>
+                <Link href="/login" className="btn btn-lg btn-outline" style={{ color: '#fff' }}>Guest Portal</Link>
+              </>
+            )}
           </div>
         </div>
         <div className="hero-image">

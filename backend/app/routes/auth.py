@@ -5,6 +5,9 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Staff
 from app.utils import hash_password, verify_password, create_access_token
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -14,7 +17,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     phone: Optional[str] = None
-    role: Optional[str] = "staff"
+    role: Optional[str] = "customer"
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -35,28 +38,41 @@ class UserResponse(BaseModel):
 
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def signup(user: UserCreate, db: Session = Depends(get_db)):
+    logger.info(f"Signup attempt for email: {user.email}")
     # Check if user already exists
-    existing_user = db.query(Staff).filter(Staff.email == user.email).first()
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+    try:
+        existing_user = db.query(Staff).filter(Staff.email == user.email).first()
+        if existing_user:
+            logger.warning(f"Signup failed: Email {user.email} already exists")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
+        
+        logger.info("Hashing password...")
+        hashed_pwd = hash_password(user.password)
+        new_staff = Staff(
+            first_name=user.first_name,
+            last_name=user.last_name,
+            email=user.email,
+            password_hash=hashed_pwd,
+            phone=user.phone,
+            role=user.role
         )
-    
-    hashed_pwd = hash_password(user.password)
-    new_staff = Staff(
-        first_name=user.first_name,
-        last_name=user.last_name,
-        email=user.email,
-        password_hash=hashed_pwd,
-        phone=user.phone,
-        role=user.role
-    )
-    
-    db.add(new_staff)
-    db.commit()
-    db.refresh(new_staff)
-    return new_staff
+        
+        logger.info("Adding to DB...")
+        db.add(new_staff)
+        logger.info("Committing...")
+        db.commit()
+        logger.info("Refreshing...")
+        db.refresh(new_staff)
+        logger.info(f"Signup successful for ID: {new_staff.id}")
+        return new_staff
+    except Exception as e:
+        logger.error(f"Error in signup: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        raise e
 
 @router.post("/signin", response_model=Token)
 async def signin(user: UserLogin, db: Session = Depends(get_db)):

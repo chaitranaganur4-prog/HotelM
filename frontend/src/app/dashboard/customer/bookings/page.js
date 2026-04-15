@@ -77,12 +77,26 @@ export default function CustomerBookings() {
     <div className="dashboard-layout">
       {/* Sidebar */}
       <aside className="sidebar">
-        <Link href="/" className="sidebar-logo">Hotel M</Link>
+        <Link href="/" className="sidebar-logo">
+          <span style={{ color: '#fff' }}>Hotel</span><span style={{ color: 'var(--color-accent)' }}>M</span>
+        </Link>
         <nav className="nav-menu">
-          <Link href="/dashboard/customer" className="nav-item"><span>🏠 Overview</span></Link>
-          <Link href="/dashboard/customer/bookings" className="nav-item active"><span>📅 My Bookings</span></Link>
-          <Link href="/dashboard/customer/book" className="nav-item"><span>🗝️ Book a Room</span></Link>
-          <Link href="/profile" className="nav-item"><span>👤 Profile</span></Link>
+          <Link href="/dashboard/customer" className="nav-item">
+            <span className="nav-icon">🏠</span>
+            <span>Overview</span>
+          </Link>
+          <Link href="/dashboard/customer/bookings" className="nav-item active">
+            <span className="nav-icon">📅</span>
+            <span>My Bookings</span>
+          </Link>
+          <Link href="/dashboard/customer/book" className="nav-item">
+            <span className="nav-icon">🗝️</span>
+            <span>Book a Room</span>
+          </Link>
+          <Link href="/explore" className="nav-item">
+            <span className="nav-icon">✨</span>
+            <span>Explore Luxury</span>
+          </Link>
         </nav>
       </aside>
 
@@ -90,25 +104,28 @@ export default function CustomerBookings() {
       <main className="main-content">
         <header className="dash-header">
           <div>
-            <h1>My Bookings</h1>
-            <p style={{ color: '#94a3b8' }}>View and manage your personal stays</p>
+            <h1 className="premium-text">My Reservations</h1>
+            <p className="text-muted">Manage your luxury stays and booking history</p>
           </div>
-          <Link href="/dashboard/customer/book" className="btn btn-primary">+ New Booking</Link>
+          <Link href="/dashboard/customer/book" className="btn btn-primary premium-btn">+ Reserve New Suite</Link>
         </header>
 
         {/* Guest Stats */}
-        <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+        <div className="stats-grid">
           <div className="stat-card">
+            <span className="stat-icon">📅</span>
             <p className="stat-label">Total Reservations</p>
             <p className="stat-value">{stats.total}</p>
           </div>
           <div className="stat-card">
+            <span className="stat-icon">🌟</span>
             <p className="stat-label">Active Stays</p>
-            <p className="stat-value" style={{ color: '#3b82f6' }}>{stats.active}</p>
+            <p className="stat-value" style={{ color: 'var(--color-accent)' }}>{stats.active}</p>
           </div>
           <div className="stat-card">
-            <p className="stat-label">Total Investment</p>
-            <p className="stat-value" style={{ color: '#22c55e' }}>${stats.spent.toLocaleString()}</p>
+            <span className="stat-icon">💰</span>
+            <p className="stat-label">Luxury Investment</p>
+            <p className="stat-value" style={{ color: 'var(--color-accent-secondary)' }}>${stats.spent.toLocaleString()}</p>
           </div>
         </div>
 

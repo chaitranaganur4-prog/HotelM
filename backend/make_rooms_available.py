@@ -1,0 +1,38 @@
+import os
+import psycopg2
+from dotenv import load_dotenv
+
+def main():
+    # Load environment variables
+    load_dotenv()
+    db_url = os.getenv("DATABASE_URL")
+    
+    if not db_url:
+        print("Error: DATABASE_URL not found in environment variables.")
+        return
+
+    # Stripping channel_binding if present (psycopg2 doesn't support it)
+    if "channel_binding" in db_url:
+        import re
+        db_url = re.sub(r'[?&]channel_binding=[^&]*', '', db_url)
+        db_url = re.sub(r'[?&]$', '', db_url)
+    
+    try:
+        print(f"Connecting to database...")
+        conn = psycopg2.connect(db_url)
+        cur = conn.cursor()
+        
+        print("Updating room statuses to 'available'...")
+        cur.execute("UPDATE rooms SET status = 'available';")
+        rows_updated = cur.rowcount
+        
+        conn.commit()
+        print(f"Successfully updated {rows_updated} rooms.")
+        
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error: {e}")
+
+if __name__ == "__main__":
+    main()
