@@ -30,7 +30,7 @@ export default function AnalyticsPage() {
   const [period, setPeriod] = useState('6m');
   const router = useRouter();
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hotelm-backend-erid.onrender.com';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hotelm-backend-final.onrender.com';
 
   const fetchStats = async () => {
     try {

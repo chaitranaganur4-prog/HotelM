@@ -24,7 +24,7 @@ export default function CustomerBookings() {
   const [filter, setFilter] = useState('all');
   const router = useRouter();
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hotelm-backend-erid.onrender.com';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hotelm-backend-final.onrender.com';
 
   useEffect(() => {
     const fetchBookings = async () => {
