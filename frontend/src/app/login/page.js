@@ -19,7 +19,7 @@ export default function CustomerLogin() {
     setSuccess('');
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://hotelm-backend-erid.onrender.com';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://hotelm-backend-final.onrender.com';
       const res = await fetch(`${apiUrl}/api/auth/signin`, {
         method: 'POST',
         headers: {

@@ -12,7 +12,7 @@ export default function CustomerDashboard() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hotelm-backend-final.onrender.com';
 
   const fetchData = async () => {
     const token = localStorage.getItem('token');
