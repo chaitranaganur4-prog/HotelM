@@ -64,8 +64,11 @@ export default function CustomerBookRoom() {
       });
 
       if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.detail || 'Failed to create booking');
+        const errData = await res.json().catch(() => ({}));
+        const msg = typeof errData.detail === 'string' 
+          ? errData.detail 
+          : (Array.isArray(errData.detail) ? errData.detail[0]?.msg : JSON.stringify(errData.detail));
+        throw new Error(msg || 'Failed to create booking');
       }
 
       setSuccess('Redirecting to secure payment...');
