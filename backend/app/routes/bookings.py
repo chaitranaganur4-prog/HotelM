@@ -35,7 +35,7 @@ class RoomInfo(BaseModel):
 
 
 class BookingCreate(BaseModel):
-    guest_id: int
+    guest_id: Optional[int] = None
     room_id: int
     check_in_date: date
     check_out_date: date
@@ -83,20 +83,61 @@ def get_booking(booking_id: int, db: Session = Depends(get_db)):
 def create_booking(booking: BookingCreate, db: Session = Depends(get_db), current_user = Depends(get_current_active_user)):
     import logging
     logger = logging.getLogger(__name__)
-    logger.info(f"Booking request: {booking}")
-    # Verify room is available
+    logger.info(f"Booking request: {booking} from user {current_user.email}")
+    
+    # 1. Resolve guest_id if not provided (for customers)
+    resolved_guest_id = booking.guest_id
+    if not resolved_guest_id:
+        if current_user.role == "customer":
+            # Check if guest record exists for this customer
+            guest = db.query(models.Guest).filter(models.Guest.email == current_user.email).first()
+            if not guest:
+                # Create guest record automatically
+                logger.info(f"Creating new Guest record for customer {current_user.email}")
+                guest = models.Guest(
+                    first_name=current_user.first_name,
+                    last_name=current_user.last_name,
+                    email=current_user.email,
+                    phone=current_user.phone
+                )
+                db.add(guest)
+                db.flush() # Get the ID without committing
+            resolved_guest_id = guest.id
+        else:
+            raise HTTPException(status_code=400, detail="guest_id is required for staff-initiated bookings")
+
+    # 2. Verify room is available
     room = db.query(models.Room).filter(models.Room.id == booking.room_id).first()
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
     if room.status != "available":
         raise HTTPException(status_code=400, detail="Room is not available")
 
-    db_booking = models.Booking(**booking.model_dump())
+    # 3. Create booking
+    booking_dict = booking.model_dump()
+    booking_dict["guest_id"] = resolved_guest_id
+    
+    # Calculate price if missing
+    if not booking_dict.get("total_amount"):
+        from decimal import Decimal
+        # Get base price from room_type
+        room_type = db.query(models.RoomType).filter(models.RoomType.id == room.room_type_id).first()
+        base_price = room_type.base_price if room_type else Decimal("100.00")
+        booking_dict["total_amount"] = float(base_price * 2) # Default 2 nights
+
+    db_booking = models.Booking(**booking_dict)
     db.add(db_booking)
 
-    # Mark room as occupied
+    # 4. Mark room as occupied
     room.status = "occupied"
-    db.commit()
+    
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Failed to commit booking: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error during booking creation")
+        
     db.refresh(db_booking)
     return db_booking
 

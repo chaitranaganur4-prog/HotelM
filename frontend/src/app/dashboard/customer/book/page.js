@@ -56,11 +56,10 @@ export default function CustomerBookRoom() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          guest_id: 1, // We'll assume guest ID 1 for now, in a real app we'd fetch the specific guest_id linked to the staff email
           room_id: roomId,
           check_in_date: checkIn.toISOString().split('T')[0],
           check_out_date: checkOut.toISOString().split('T')[0],
-          total_amount: 250.0 // Mocked price
+          // total_amount is optional as backend will calculate if missing
         }),
       });
 
